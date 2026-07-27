@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "571013355552",
+    "project_id": "smart-location-alaram",
+    "storage_bucket": "smart-location-alaram.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571013355552:android:ca98a348fc5efb8fed8445",
+        "android_client_info": {
+          "package_name": "com.smartroutealert.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPIA7VnE5560n1k1B-5UR2cjqcSq7CG_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
