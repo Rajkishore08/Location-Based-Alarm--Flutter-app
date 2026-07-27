@@ -3,6 +3,8 @@
 *.log
 *.zip
 .env
+google-services.json
+GoogleService-Info.plist
 *.pyc
 *.swp
 .DS_Store

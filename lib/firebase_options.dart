@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform, kIsWeb;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
@@ -22,36 +23,41 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBPIA7VnE5560n1k1B-5UR2cjqcSq7CG_s',
-    appId: '1:571013355552:android:ca98a348fc5efb8fed8445',
-    messagingSenderId: '571013355552',
-    projectId: 'smart-location-alaram',
-    storageBucket: 'smart-location-alaram.firebasestorage.app',
-  );
+  static String get _projectId => dotenv.env['FIREBASE_PROJECT_ID'] ?? 'smart-location-alaram';
+  static String get _storageBucket =>
+      dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? 'smart-location-alaram.firebasestorage.app';
+  static String get _messagingSenderId => dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '571013355552';
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCRfTY-LOlKzXxA3vjDSfzOJ2qXuPZm4Uo',
-    appId: '1:571013355552:web:cbc42b3c501aebb5ed8445',
-    messagingSenderId: '571013355552',
-    projectId: 'smart-location-alaram',
-    authDomain: 'smart-location-alaram.firebaseapp.com',
-    storageBucket: 'smart-location-alaram.firebasestorage.app',
-  );
+  static FirebaseOptions get android => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY'] ?? '',
+        appId: dotenv.env['FIREBASE_ANDROID_APP_ID'] ?? '',
+        messagingSenderId: _messagingSenderId,
+        projectId: _projectId,
+        storageBucket: _storageBucket,
+      );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCRfTY-LOlKzXxA3vjDSfzOJ2qXuPZm4Uo',
-    appId: '1:571013355552:ios:ca98a348fc5efb8fed8445',
-    messagingSenderId: '571013355552',
-    projectId: 'smart-location-alaram',
-    storageBucket: 'smart-location-alaram.firebasestorage.app',
-  );
+  static FirebaseOptions get web => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_WEB_API_KEY'] ?? '',
+        appId: dotenv.env['FIREBASE_WEB_APP_ID'] ?? '',
+        messagingSenderId: _messagingSenderId,
+        projectId: _projectId,
+        authDomain: dotenv.env['FIREBASE_WEB_AUTH_DOMAIN'] ?? 'smart-location-alaram.firebaseapp.com',
+        storageBucket: _storageBucket,
+      );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCRfTY-LOlKzXxA3vjDSfzOJ2qXuPZm4Uo',
-    appId: '1:571013355552:ios:ca98a348fc5efb8fed8445',
-    messagingSenderId: '571013355552',
-    projectId: 'smart-location-alaram',
-    storageBucket: 'smart-location-alaram.firebasestorage.app',
-  );
+  static FirebaseOptions get ios => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_IOS_API_KEY'] ?? '',
+        appId: dotenv.env['FIREBASE_IOS_APP_ID'] ?? '',
+        messagingSenderId: _messagingSenderId,
+        projectId: _projectId,
+        storageBucket: _storageBucket,
+      );
+
+  static FirebaseOptions get macos => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_IOS_API_KEY'] ?? '',
+        appId: dotenv.env['FIREBASE_IOS_APP_ID'] ?? '',
+        messagingSenderId: _messagingSenderId,
+        projectId: _projectId,
+        storageBucket: _storageBucket,
+      );
 }
