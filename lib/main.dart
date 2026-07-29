@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,38 +11,57 @@ import 'services/storage/local_storage_service.dart';
 import 'shared/providers/app_providers.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables (.env) if present
-  try {
-    await dotenv.load(fileName: ".env");
-  } catch (_) {
-    // Graceful fallback when .env is omitted in build environment
-  }
+    // Global Flutter Error Handler (prevents app crash)
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('Global Flutter Framework Error: ${details.exception}');
+    };
 
-  // Initialize Firebase Core
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    // Safe Dotenv Loader
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      debugPrint('Dotenv init note: $e');
+    }
+
+    // Safe Firebase Core Initialization
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      debugPrint('Firebase init note: $e');
+    }
+
+    // Safe Local Storage Service Initialization
+    LocalStorageService? storageService;
+    try {
+      storageService = await LocalStorageService.init();
+    } catch (e) {
+      debugPrint('LocalStorageService init note: $e');
+    }
+
+    // Safe Alarm Service Initialization
+    final alarmService = AlarmService();
+    try {
+      await alarmService.initialize();
+    } catch (e) {
+      debugPrint('AlarmService init note: $e');
+    }
+
+    runApp(
+      ProviderScope(
+        overrides: [
+          if (storageService != null) storageServiceProvider.overrideWithValue(storageService),
+          alarmServiceProvider.overrideWithValue(alarmService),
+        ],
+        child: const SmartRouteAlertApp(),
+      ),
     );
-  } catch (e) {
-    debugPrint('Firebase init note: $e');
-  }
-
-  // Initialize storage service
-  final storageService = await LocalStorageService.init();
-
-  // Initialize alarm notification channels
-  final alarmService = AlarmService();
-  await alarmService.initialize();
-
-  runApp(
-    ProviderScope(
-      overrides: [
-        storageServiceProvider.overrideWithValue(storageService),
-        alarmServiceProvider.overrideWithValue(alarmService),
-      ],
-      child: const SmartRouteAlertApp(),
-    ),
-  );
+  }, (error, stackTrace) {
+    debugPrint('Uncaught Async Error: $error\n$stackTrace');
+  });
 }
