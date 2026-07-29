@@ -20,25 +20,27 @@ class SmartAlertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
     return ClipRRect(
       borderRadius: AppRadius.borderXl,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.glassDarkBg : AppColors.glassLightBg,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E1B4B), Color(0xFF0F172A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: AppRadius.borderXl,
             border: Border.all(
-              color: isDark ? AppColors.primaryFixed.withValues(alpha: 0.4) : AppColors.primaryContainer,
+              color: AppColors.secondary,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryContainer.withValues(alpha: isDark ? 0.35 : 0.15),
-                blurRadius: 20,
+                color: AppColors.secondary.withValues(alpha: 0.3),
+                blurRadius: 24,
                 spreadRadius: 2,
               ),
             ],
@@ -46,16 +48,24 @@ class SmartAlertCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryContainer, AppColors.secondary],
+                  ),
                   borderRadius: AppRadius.borderLg,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                      blurRadius: 12,
+                    ),
+                  ],
                 ),
                 child: Icon(
                   icon,
                   color: Colors.white,
-                  size: 26,
+                  size: 28,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -64,21 +74,38 @@ class SmartAlertCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      statusText.toUpperCase(),
-                      style: AppTypography.labelMd.copyWith(
-                        color: isDark ? AppColors.primaryFixed : AppColors.primaryContainer,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.success,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: AppColors.success, blurRadius: 6),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          statusText.toUpperCase(),
+                          style: AppTypography.labelMd.copyWith(
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.8,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       mainTitle,
                       style: AppTypography.headlineMd.copyWith(
                         fontSize: 18,
-                        color: isDark ? Colors.white : AppColors.onSurface,
-                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -87,16 +114,25 @@ class SmartAlertCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryContainer,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.secondaryContainer, AppColors.primaryContainer],
+                  ),
                   borderRadius: AppRadius.borderFull,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.secondaryContainer.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
                 child: Text(
                   etaText,
                   style: AppTypography.labelMd.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
                 ),
               ),

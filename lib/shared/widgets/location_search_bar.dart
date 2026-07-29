@@ -27,16 +27,16 @@ class LocationSearchBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2638) : AppColors.surfaceContainerLow,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: AppRadius.borderXl,
         border: Border.all(
-          color: isDark ? AppColors.glassBorderDark : Colors.transparent,
+          color: AppColors.primaryContainer.withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: AppColors.primaryContainer.withValues(alpha: 0.12),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -47,16 +47,18 @@ class LocationSearchBar extends StatelessWidget {
         onTap: onTap,
         readOnly: readOnly,
         style: AppTypography.bodyLg.copyWith(
-          color: isDark ? AppColors.inverseOnSurface : AppColors.onSurface,
+          color: isDark ? AppColors.onSurface : Colors.black87,
+          fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: AppTypography.bodyLg.copyWith(
-            color: isDark ? AppColors.outlineVariant : AppColors.outline,
+            color: AppColors.outline,
+            fontSize: 14,
           ),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.outline),
+          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.secondary),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.mic_rounded, color: AppColors.primary),
+            icon: const Icon(Icons.mic_rounded, color: AppColors.primaryContainer),
             onPressed: onMicTap,
           ),
           border: InputBorder.none,

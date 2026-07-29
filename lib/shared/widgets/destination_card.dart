@@ -50,32 +50,51 @@ class DestinationCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? AppColors.primaryContainer.withValues(alpha: 0.3) : AppColors.surfaceContainerHigh)
-              : (isDark ? const Color(0xFF1E2638) : AppColors.surfaceContainerLow),
+              ? AppColors.primaryContainer.withValues(alpha: 0.25)
+              : (isDark ? const Color(0xFF1E293B) : Colors.white),
           borderRadius: AppRadius.borderXl,
           border: Border.all(
             color: isSelected
-                ? AppColors.primaryContainer
-                : (isDark ? AppColors.glassBorderDark : AppColors.outlineVariant.withValues(alpha: 0.4)),
+                ? AppColors.secondary
+                : AppColors.primaryContainer.withValues(alpha: 0.2),
             width: isSelected ? 2.0 : 1.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? AppColors.secondary.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.12),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primaryContainer
-                    : (isDark ? AppColors.inverseSurface : AppColors.surfaceContainerHighest),
+                gradient: LinearGradient(
+                  colors: isSelected
+                      ? [AppColors.primaryContainer, AppColors.secondary]
+                      : [AppColors.primaryContainer.withValues(alpha: 0.15), const Color(0xFF1E293B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.secondary.withValues(alpha: 0.4),
+                          blurRadius: 10,
+                        ),
+                      ]
+                    : [],
               ),
               child: Icon(
                 _getIconData(destination.iconName ?? destination.category),
-                color: isSelected
-                    ? Colors.white
-                    : (isDark ? AppColors.inversePrimary : AppColors.primary),
+                color: isSelected ? Colors.white : AppColors.secondary,
                 size: 24,
               ),
             ),
@@ -88,7 +107,7 @@ class DestinationCard extends StatelessWidget {
                     destination.name,
                     style: AppTypography.bodyLg.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.inverseOnSurface : AppColors.onSurface,
+                      color: isDark ? AppColors.onSurface : Colors.black87,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -97,18 +116,27 @@ class DestinationCard extends StatelessWidget {
                   Text(
                     destination.address,
                     style: AppTypography.bodyMd.copyWith(
-                      color: isDark ? AppColors.outlineVariant : AppColors.onSurfaceVariant,
+                      color: AppColors.outline,
+                      fontSize: 12,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (destination.distanceMeters != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      '${(destination.distanceMeters! / 1000).toStringAsFixed(1)} km away',
-                      style: AppTypography.labelMd.copyWith(
-                        color: AppColors.secondary,
-                      ),
+                    Row(
+                      children: [
+                        const Icon(Icons.near_me_rounded, size: 12, color: AppColors.secondary),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${(destination.distanceMeters! / 1000).toStringAsFixed(1)} km away',
+                          style: AppTypography.labelMd.copyWith(
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
@@ -117,7 +145,7 @@ class DestinationCard extends StatelessWidget {
             if (onFavoriteTap != null)
               IconButton(
                 onPressed: onFavoriteTap,
-                icon: const Icon(Icons.bookmark_outline_rounded, color: AppColors.primary),
+                icon: const Icon(Icons.bookmark_outline_rounded, color: AppColors.secondary),
               ),
           ],
         ),
