@@ -9,6 +9,7 @@ import '../../services/search/places_service.dart';
 import '../../services/smart_alert/distance_service.dart';
 import '../../services/smart_alert/smart_alert_engine.dart';
 import '../../services/storage/local_storage_service.dart';
+import '../../services/voice/voice_assistant_service.dart';
 
 import '../models/alarm_configuration.dart';
 import '../models/destination.dart';
@@ -47,6 +48,10 @@ final placesServiceProvider = Provider<PlacesService>((ref) {
 
 final smartAlertEngineProvider = Provider<SmartAlertEngine>((ref) {
   return SmartAlertEngine();
+});
+
+final voiceAssistantServiceProvider = Provider<VoiceAssistantService>((ref) {
+  return VoiceAssistantService();
 });
 
 // Saved Places Notifier

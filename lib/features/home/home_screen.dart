@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,7 @@ import '../../shared/widgets/location_search_bar.dart';
 import '../../shared/widgets/smart_alert_card.dart';
 import '../saved_places/widgets/map_location_picker_modal.dart';
 import '../simulation/simulation_drawer.dart';
+import '../voice_assistant/widgets/voice_assistant_modal.dart';
 import 'widgets/interactive_map_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -28,10 +30,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   LocationSample? _currentGpsLocation;
   bool _isMapNightMode = false;
 
+  StreamSubscription<LocationSample>? _locationSub;
+
   @override
   void initState() {
     super.initState();
     _fetchCurrentLocation();
+    _subscribeToLocation();
+  }
+
+  @override
+  void dispose() {
+    _locationSub?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToLocation() {
+    final locationService = ref.read(locationServiceProvider);
+    _locationSub = locationService.locationStream.listen((loc) {
+      if (mounted) {
+        setState(() {
+          _currentGpsLocation = loc;
+        });
+      }
+    });
   }
 
   Future<void> _fetchCurrentLocation() async {
@@ -41,6 +63,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _currentGpsLocation = loc;
       });
     }
+  }
+
+  void _openVoiceAssistant() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const VoiceAssistantModal(),
+    );
   }
 
   @override
@@ -83,6 +114,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
+          // Voice Assistant Mic Action Pill
+          IconButton(
+            icon: const Icon(Icons.mic_rounded, color: AppColors.primaryContainer),
+            tooltip: 'Buddy Voice AI Assistant',
+            onPressed: _openVoiceAssistant,
+          ),
           IconButton(
             icon: Icon(
               _isMapNightMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
@@ -183,6 +220,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Voice Assistant Banner Card
+            GestureDetector(
+              onTap: _openVoiceAssistant,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [const Color(0xFF1E1B4B), const Color(0xFF0F172A)]
+                        : [AppColors.primaryContainer.withValues(alpha: 0.1), Colors.white],
+                  ),
+                  borderRadius: AppRadius.borderXl,
+                  border: Border.all(color: AppColors.primaryContainer.withValues(alpha: 0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryContainer.withValues(alpha: 0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryContainer.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.graphic_eq_rounded, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Buddy Voice AI',
+                                style: AppTypography.bodyLg.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'VOICE COMMAND',
+                                  style: AppTypography.labelMd.copyWith(
+                                    fontSize: 9,
+                                    color: AppColors.primaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Say "Hey buddy set alarm for Home or Office"',
+                            style: AppTypography.bodyMd.copyWith(
+                              color: AppColors.outline,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.mic_rounded, color: AppColors.primaryContainer),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: AppSpacing.lg),
 
             // Active Journey Card
@@ -361,6 +484,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.xl),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openVoiceAssistant,
+        backgroundColor: AppColors.primaryContainer,
+        icon: const Icon(Icons.mic_rounded, color: Colors.white),
+        label: const Text('Buddy Voice AI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       bottomNavigationBar: AppBottomNavigation(
         currentIndex: _navIndex,

@@ -21,19 +21,51 @@ class LocationService {
     return await Geolocator.requestPermission();
   }
 
-  /// Gets current high-accuracy GPS position with safe fallback
+  /// Gets current high-accuracy GPS position with instant last known location fallback
   Future<LocationSample> getCurrentLocation() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
 
       if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+        // Fast instant fetch from last known position first
+        final Position? lastPos = await Geolocator.getLastKnownPosition();
+        if (lastPos != null) {
+          // Asynchronously trigger fresh high accuracy fix
+          Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              timeLimit: Duration(seconds: 4),
+            ),
+          ).then((highPos) {
+            _locationController.add(LocationSample(
+              latitude: highPos.latitude,
+              longitude: highPos.longitude,
+              altitude: highPos.altitude,
+              speed: highPos.speed,
+              heading: highPos.heading,
+              accuracy: highPos.accuracy,
+              timestamp: highPos.timestamp,
+            ));
+          }).catchError((_) {});
+
+          return LocationSample(
+            latitude: lastPos.latitude,
+            longitude: lastPos.longitude,
+            altitude: lastPos.altitude,
+            speed: lastPos.speed,
+            heading: lastPos.heading,
+            accuracy: lastPos.accuracy,
+            timestamp: lastPos.timestamp,
+          );
+        }
+
         final Position pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 5),
+            timeLimit: Duration(seconds: 4),
           ),
         );
         return LocationSample(
@@ -46,17 +78,15 @@ class LocationService {
           timestamp: pos.timestamp,
         );
       }
-    } catch (_) {
-      // Fallback default position (e.g. Chennai Central)
-    }
+    } catch (_) {}
 
     return LocationSample(
-      latitude: 13.0827,
-      longitude: 80.2707,
-      altitude: 10.0,
-      speed: 12.5, // ~45 km/h
-      heading: 180.0,
-      accuracy: 5.0,
+      latitude: 0.0,
+      longitude: 0.0,
+      altitude: 0.0,
+      speed: 0.0,
+      heading: 0.0,
+      accuracy: 10.0,
       timestamp: DateTime.now(),
     );
   }
@@ -86,9 +116,7 @@ class LocationService {
         );
         _locationController.add(sample);
       },
-      onError: (err) {
-        // Handle stream error gracefully
-      },
+      onError: (err) {},
     );
   }
 
