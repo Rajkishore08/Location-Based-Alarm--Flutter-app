@@ -1,65 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Stitch Typography Tokens using Inter font family
+/// World-Class AI SaaS Typography Hierarchy
+/// Uses Inter font family with SF Pro / Linear styling proportions
 class AppTypography {
   AppTypography._();
 
-  static TextStyle get displayData => GoogleFonts.inter(
-        fontSize: 48,
-        height: 56 / 48,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.96,
+  // Hero Display: 32 - 36px
+  static TextStyle get hero => GoogleFonts.inter(
+        fontSize: 34,
+        height: 42 / 34,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -1.0,
       );
 
-  static TextStyle get headlineLg => GoogleFonts.inter(
-        fontSize: 30,
-        height: 38 / 30,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.3,
-      );
-
-  static TextStyle get headlineLgMobile => GoogleFonts.inter(
-        fontSize: 24,
-        height: 32 / 24,
+  // Section Titles: 22px
+  static TextStyle get sectionTitle => GoogleFonts.inter(
+        fontSize: 22,
+        height: 28 / 22,
         fontWeight: FontWeight.w800,
+        letterSpacing: -0.4,
+      );
+
+  // Cards: 18px
+  static TextStyle get cardTitle => GoogleFonts.inter(
+        fontSize: 18,
+        height: 24 / 18,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
       );
 
-  static TextStyle get headlineMd => GoogleFonts.inter(
-        fontSize: 20,
-        height: 28 / 20,
-        fontWeight: FontWeight.w700,
-      );
-
-  static TextStyle get bodyLg => GoogleFonts.inter(
-        fontSize: 16,
-        height: 24 / 16,
+  // Body: 15 - 16px
+  static TextStyle get body => GoogleFonts.inter(
+        fontSize: 15,
+        height: 22 / 15,
         fontWeight: FontWeight.w500,
       );
 
-  static TextStyle get bodyMd => GoogleFonts.inter(
-        fontSize: 14,
-        height: 20 / 14,
+  // Captions: 13px
+  static TextStyle get caption => GoogleFonts.inter(
+        fontSize: 13,
+        height: 18 / 13,
         fontWeight: FontWeight.w400,
       );
 
-  static TextStyle get statsSm => GoogleFonts.inter(
-        fontSize: 18,
-        height: 22 / 18,
-        fontWeight: FontWeight.w700,
-      );
-
-  static TextStyle get labelMd => GoogleFonts.inter(
-        fontSize: 12,
-        height: 16 / 12,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.6,
-      );
-
-  static TextStyle get labelSm => GoogleFonts.inter(
-        fontSize: 11,
-        height: 14 / 11,
-        fontWeight: FontWeight.w500,
-      );
+  // Backward-compatibility aliases
+  static TextStyle get displayData => hero;
+  static TextStyle get headlineLg => hero;
+  static TextStyle get headlineLgMobile => hero.copyWith(fontSize: 28);
+  static TextStyle get headlineMd => sectionTitle;
+  static TextStyle get bodyLg => body.copyWith(fontSize: 16);
+  static TextStyle get bodyMd => body;
+  static TextStyle get statsSm => cardTitle;
+  static TextStyle get labelMd => caption.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.8);
+  static TextStyle get labelSm => caption.copyWith(fontSize: 11);
 }

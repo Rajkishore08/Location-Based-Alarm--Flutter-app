@@ -16,59 +16,80 @@ class AppBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xE60F172A) : AppColors.surface,
-            border: Border(
-              top: BorderSide(
-                color: AppColors.primaryContainer.withValues(alpha: 0.25),
-                width: 1.0,
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            height: 64,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xE60F172A) : Colors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: AppColors.secondary.withValues(alpha: 0.35),
+                width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.secondary.withValues(alpha: 0.2),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.explore_outlined, Icons.explore_rounded, 'Explore'),
+                _buildNavItem(1, Icons.history_outlined, Icons.history_rounded, 'History'),
+                _buildNavItem(2, Icons.bookmark_outline_rounded, Icons.bookmark_rounded, 'Saved'),
+                _buildNavItem(3, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
+    final bool isSelected = currentIndex == index;
+
+    return InkWell(
+      onTap: () => onTap(index),
+      borderRadius: BorderRadius.circular(24),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.secondary.withValues(alpha: 0.18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          border: isSelected
+              ? Border.all(color: AppColors.secondary.withValues(alpha: 0.4))
+              : Border.all(color: Colors.transparent),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected ? AppColors.secondary : AppColors.outline,
+              size: 22,
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.secondary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ],
-          ),
-          child: BottomNavigationBar(
-            currentIndex: currentIndex,
-            onTap: onTap,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            selectedItemColor: AppColors.secondary,
-            unselectedItemColor: AppColors.outline,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.explore_outlined),
-                activeIcon: Icon(Icons.explore_rounded, color: AppColors.secondary),
-                label: 'Explore',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.history_outlined),
-                activeIcon: Icon(Icons.history_rounded, color: AppColors.secondary),
-                label: 'History',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bookmark_outline_rounded),
-                activeIcon: Icon(Icons.bookmark_rounded, color: AppColors.secondary),
-                label: 'Saved',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline_rounded),
-                activeIcon: Icon(Icons.person_rounded, color: AppColors.secondary),
-                label: 'Profile',
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

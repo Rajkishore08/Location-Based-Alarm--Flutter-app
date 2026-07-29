@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,11 +34,11 @@ class _VoiceAssistantModalState extends ConsumerState<VoiceAssistantModal>
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.35).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Auto-start listening on modal open
+    // Auto-start speech recognition on open
     Future.microtask(() => _startListening());
   }
 
@@ -51,7 +52,7 @@ class _VoiceAssistantModalState extends ConsumerState<VoiceAssistantModal>
     final voiceService = ref.read(voiceAssistantServiceProvider);
     setState(() {
       _isListening = true;
-      _userTranscript = 'Listening... Speak your command!';
+      _userTranscript = 'Listening to your speech... Speak clearly!';
       _aiResponse = '';
       _isProcessing = false;
     });
@@ -76,7 +77,7 @@ class _VoiceAssistantModalState extends ConsumerState<VoiceAssistantModal>
     setState(() {
       _isListening = false;
     });
-    if (_userTranscript.isNotEmpty && _userTranscript != 'Listening... Speak your command!') {
+    if (_userTranscript.isNotEmpty && !_userTranscript.startsWith('Listening')) {
       _processCommand(_userTranscript);
     }
   }
@@ -118,12 +119,12 @@ class _VoiceAssistantModalState extends ConsumerState<VoiceAssistantModal>
                 config: config,
               );
 
-          await Future.delayed(const Duration(milliseconds: 2400));
+          await Future.delayed(const Duration(milliseconds: 2200));
           if (mounted) {
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('🎉 ${result.aiResponse}'),
+                content: Text('⚡ ${result.aiResponse}'),
                 backgroundColor: AppColors.success,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -136,210 +137,216 @@ class _VoiceAssistantModalState extends ConsumerState<VoiceAssistantModal>
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceContainerLow,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: AppColors.primaryContainer.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryContainer.withValues(alpha: 0.25),
-            blurRadius: 32,
-            offset: const Offset(0, -8),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.95),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: AppColors.thinBorder, width: 1.5),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 40,
+                offset: Offset(0, -12),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Container(
-            width: 44,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.outlineVariant,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Header Title
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Drag Handle
               Container(
-                padding: const EdgeInsets.all(6),
+                width: 48,
+                height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.graphic_eq_rounded, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Buddy Voice AI Assistant',
-                style: AppTypography.headlineLgMobile.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  color: AppColors.textSecondary.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Say "Hey buddy set alarm for Home" or "Set alert for Office"',
-            style: AppTypography.bodyMd.copyWith(color: AppColors.outline, fontSize: 12),
-          ),
+              const SizedBox(height: AppSpacing.md),
 
-          const SizedBox(height: AppSpacing.xl),
-
-          // Animated Mic Wave Visualizer Button
-          GestureDetector(
-            onTap: () {
-              if (_isListening) {
-                _stopListening();
-              } else {
-                _startListening();
-              }
-            },
-            child: AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _isListening ? _pulseAnimation.value : 1.0,
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: _isListening
-                            ? [AppColors.primaryContainer, AppColors.secondary]
-                            : [AppColors.primaryFixedDim, AppColors.primaryContainer],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (_isListening ? AppColors.primaryContainer : AppColors.secondary)
-                              .withValues(alpha: 0.5),
-                          blurRadius: _isListening ? 28 : 12,
-                          spreadRadius: _isListening ? 6 : 2,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
-                      color: Colors.white,
-                      size: 42,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Status & Live Transcript Card
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : AppColors.surfaceContainer,
-              borderRadius: AppRadius.borderXl,
-              border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  _userTranscript.isEmpty
-                      ? 'Tap mic and say: "Set alarm for Home"'
-                      : '"$_userTranscript"',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyLg.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: _isListening ? AppColors.primary : AppColors.onSurface,
-                  ),
-                ),
-                if (_isProcessing) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // AI Voice Speech Response Card
-          if (_aiResponse.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.12),
-                borderRadius: AppRadius.borderXl,
-                border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
-              ),
-              child: Row(
+              // Title Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.smart_toy_rounded, color: AppColors.success, size: 24),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.brandGradient,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      _aiResponse,
-                      style: AppTypography.bodyMd.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    'Perplexity AI Command Center',
+                    style: AppTypography.cardTitle.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 20,
+                      color: Colors.white,
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Natural Language Intent Engine',
+                style: AppTypography.caption.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
+              ),
 
-          const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
-          // Quick Command Chips
-          Text(
-            'QUICK VOICE COMMANDS',
-            style: AppTypography.labelMd.copyWith(
-              color: AppColors.outline,
-              fontSize: 10,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: [
-              _buildQuickChip('Hey buddy set alarm for Home'),
-              _buildQuickChip('Set alert for Office'),
-              _buildQuickChip('Set alarm for 2 km'),
-              _buildQuickChip('Cancel alarm'),
+              // Multi-Color Pulsing AI Intelligence Orb
+              GestureDetector(
+                onTap: () {
+                  if (_isListening) {
+                    _stopListening();
+                  } else {
+                    _startListening();
+                  }
+                },
+                child: AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _isListening ? _pulseAnimation.value : 1.0,
+                      child: Container(
+                        width: 104,
+                        height: 104,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppColors.brandGradient,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: _isListening ? 0.65 : 0.3),
+                              blurRadius: _isListening ? 36 : 18,
+                              spreadRadius: _isListening ? 8 : 2,
+                            ),
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: _isListening ? 0.45 : 0.2),
+                              blurRadius: _isListening ? 48 : 24,
+                              spreadRadius: _isListening ? 12 : 4,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // Live Transcription Glass Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceSecondary,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.thinBorder),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      _userTranscript.isEmpty
+                          ? 'Tap mic and say: "Wake me before my stop"'
+                          : '"$_userTranscript"',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.body.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: _isListening ? AppColors.success : Colors.white,
+                      ),
+                    ),
+                    if (_isProcessing) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.success),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // AI Voice Spoken Response Card
+              if (_aiResponse.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.smart_toy_rounded, color: AppColors.success, size: 24),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          _aiResponse,
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // Requested AI Prompt Chips
+              Text(
+                'SUGGESTED PROMPTS',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  _buildPromptChip('Wake me before my stop'),
+                  _buildPromptChip('Alert me near office'),
+                  _buildPromptChip('Navigate to Airport'),
+                  _buildPromptChip('Find nearest EV station'),
+                ],
+              ),
+
+              const SizedBox(height: AppSpacing.md),
             ],
           ),
-
-          const SizedBox(height: AppSpacing.md),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildQuickChip(String command) {
+  Widget _buildPromptChip(String command) {
     return ActionChip(
-      avatar: const Icon(Icons.record_voice_over_rounded, size: 14, color: AppColors.primaryContainer),
-      label: Text(command, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-      backgroundColor: AppColors.primaryContainer.withValues(alpha: 0.12),
-      side: BorderSide(color: AppColors.primaryContainer.withValues(alpha: 0.3)),
+      avatar: const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.accent),
+      label: Text(command, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+      backgroundColor: AppColors.surfaceSecondary,
+      side: const BorderSide(color: AppColors.thinBorder),
       onPressed: () {
         setState(() {
           _userTranscript = command;
