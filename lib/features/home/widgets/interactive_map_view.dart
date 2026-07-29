@@ -48,6 +48,17 @@ class _InteractiveMapViewState extends State<InteractiveMapView> with SingleTick
   }
 
   @override
+  void didUpdateWidget(covariant InteractiveMapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentSample.latitude != widget.currentSample.latitude ||
+        oldWidget.currentSample.longitude != widget.currentSample.longitude) {
+      if (widget.currentSample.latitude != 0.0 && widget.currentSample.longitude != 0.0) {
+        _mapController.move(LatLng(widget.currentSample.latitude, widget.currentSample.longitude), _mapController.camera.zoom);
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _pulseController.dispose();
     super.dispose();
@@ -55,7 +66,9 @@ class _InteractiveMapViewState extends State<InteractiveMapView> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    final LatLng currentPos = LatLng(widget.currentSample.latitude, widget.currentSample.longitude);
+    final double lat = widget.currentSample.latitude == 0.0 ? 13.0827 : widget.currentSample.latitude;
+    final double lng = widget.currentSample.longitude == 0.0 ? 80.2707 : widget.currentSample.longitude;
+    final LatLng currentPos = LatLng(lat, lng);
 
     final String tileUrl = widget.isNightMode
         ? 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
@@ -208,6 +221,7 @@ class _InteractiveMapViewState extends State<InteractiveMapView> with SingleTick
           children: [
             TileLayer(
               urlTemplate: tileUrl,
+              fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.smartroutealert.app',
               maxZoom: 19,
             ),
@@ -275,8 +289,10 @@ class _InteractiveMapViewState extends State<InteractiveMapView> with SingleTick
                 foregroundColor: AppColors.primary,
                 elevation: 4,
                 onPressed: () {
-                  _mapController.move(currentPos, 15.0);
                   widget.onRecenter?.call();
+                  if (lat != 0.0 && lng != 0.0) {
+                    _mapController.move(currentPos, 15.0);
+                  }
                 },
                 child: const Icon(Icons.gps_fixed_rounded),
               ),

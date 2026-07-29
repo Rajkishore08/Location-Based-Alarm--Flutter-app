@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../shared/models/location_sample.dart';
 
@@ -32,23 +33,24 @@ class LocationService {
       if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
         // Fast instant fetch from last known position first
         final Position? lastPos = await Geolocator.getLastKnownPosition();
-        if (lastPos != null) {
+        if (lastPos != null && lastPos.latitude != 0.0 && lastPos.longitude != 0.0) {
           // Asynchronously trigger fresh high accuracy fix
           Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
               accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 4),
             ),
           ).then((highPos) {
-            _locationController.add(LocationSample(
-              latitude: highPos.latitude,
-              longitude: highPos.longitude,
-              altitude: highPos.altitude,
-              speed: highPos.speed,
-              heading: highPos.heading,
-              accuracy: highPos.accuracy,
-              timestamp: highPos.timestamp,
-            ));
+            if (highPos.latitude != 0.0 && highPos.longitude != 0.0) {
+              _locationController.add(LocationSample(
+                latitude: highPos.latitude,
+                longitude: highPos.longitude,
+                altitude: highPos.altitude,
+                speed: highPos.speed,
+                heading: highPos.heading,
+                accuracy: highPos.accuracy,
+                timestamp: highPos.timestamp,
+              ));
+            }
           }).catchError((_) {});
 
           return LocationSample(
@@ -65,28 +67,32 @@ class LocationService {
         final Position pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 4),
           ),
         );
-        return LocationSample(
-          latitude: pos.latitude,
-          longitude: pos.longitude,
-          altitude: pos.altitude,
-          speed: pos.speed,
-          heading: pos.heading,
-          accuracy: pos.accuracy,
-          timestamp: pos.timestamp,
-        );
+        if (pos.latitude != 0.0 && pos.longitude != 0.0) {
+          return LocationSample(
+            latitude: pos.latitude,
+            longitude: pos.longitude,
+            altitude: pos.altitude,
+            speed: pos.speed,
+            heading: pos.heading,
+            accuracy: pos.accuracy,
+            timestamp: pos.timestamp,
+          );
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Location service note: $e');
+    }
 
+    // Default Fallback
     return LocationSample(
-      latitude: 0.0,
-      longitude: 0.0,
-      altitude: 0.0,
+      latitude: 13.0827,
+      longitude: 80.2707,
+      altitude: 10.0,
       speed: 0.0,
       heading: 0.0,
-      accuracy: 10.0,
+      accuracy: 5.0,
       timestamp: DateTime.now(),
     );
   }
@@ -105,16 +111,18 @@ class LocationService {
 
     _positionSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
       (Position pos) {
-        final sample = LocationSample(
-          latitude: pos.latitude,
-          longitude: pos.longitude,
-          altitude: pos.altitude,
-          speed: pos.speed,
-          heading: pos.heading,
-          accuracy: pos.accuracy,
-          timestamp: pos.timestamp,
-        );
-        _locationController.add(sample);
+        if (pos.latitude != 0.0 && pos.longitude != 0.0) {
+          final sample = LocationSample(
+            latitude: pos.latitude,
+            longitude: pos.longitude,
+            altitude: pos.altitude,
+            speed: pos.speed,
+            heading: pos.heading,
+            accuracy: pos.accuracy,
+            timestamp: pos.timestamp,
+          );
+          _locationController.add(sample);
+        }
       },
       onError: (err) {},
     );

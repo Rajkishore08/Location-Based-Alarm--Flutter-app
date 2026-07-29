@@ -157,15 +157,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   const SizedBox(height: AppSpacing.md),
 
-                  // Search History Chips
+                  // Search History Chips (Vector Icons)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildRecentChip('📍 Central Station'),
-                        _buildRecentChip('✈️ Airport Gate 3'),
-                        _buildRecentChip('🏢 Cyber IT Park'),
-                        _buildRecentChip('🎓 Tech University'),
+                        _buildRecentChip('Central Station', Icons.train_rounded),
+                        _buildRecentChip('Airport Gate 3', Icons.flight_takeoff_rounded),
+                        _buildRecentChip('Cyber IT Park', Icons.business_rounded),
+                        _buildRecentChip('Tech University', Icons.school_rounded),
                       ],
                     ),
                   ),
@@ -372,7 +372,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 90), // Clearance for bottom floating dock
+                  const SizedBox(height: 90),
                 ],
               ),
             ),
@@ -402,12 +402,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Row(
               children: [
                 Text(
-                  'Good Morning Raj 👋',
+                  'Good Morning Raj',
                   style: AppTypography.hero.copyWith(
                     color: Colors.white,
                     fontSize: 24,
                   ),
                 ),
+                const SizedBox(width: 6),
+                const Icon(Icons.waving_hand_rounded, color: AppColors.warning, size: 22),
               ],
             ),
             const SizedBox(height: 4),
@@ -423,8 +425,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 const SizedBox(width: 6),
+                const Icon(Icons.wb_sunny_rounded, size: 14, color: AppColors.warning),
+                const SizedBox(width: 4),
                 Text(
-                  'AI Engine Active  •  🌤️ 28°C Clear',
+                  'AI Engine Active  •  28°C Clear',
                   style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -443,16 +447,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: const Icon(Icons.notifications_none_rounded, color: AppColors.textSecondary, size: 20),
             ),
             const SizedBox(width: 8),
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                gradient: AppColors.brandGradient,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white24, width: 1.5),
-              ),
-              child: const Center(
-                child: Text('R', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            GestureDetector(
+              onTap: () => context.push('/profile'),
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  gradient: AppColors.brandGradient,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white24, width: 1.5),
+                ),
+                child: const Center(
+                  child: Text('R', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
               ),
             ),
           ],
@@ -542,10 +549,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildRecentChip(String label) {
+  Widget _buildRecentChip(String label, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Chip(
+        avatar: Icon(icon, size: 14, color: AppColors.primary),
         label: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
         backgroundColor: AppColors.surfaceSecondary,
         side: const BorderSide(color: AppColors.thinBorder),
